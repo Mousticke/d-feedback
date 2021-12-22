@@ -5,7 +5,6 @@ import "./SafeMath.sol";
 
 contract Feedback {
     using SafeMath for uint256;
-    uint256 nextId = 0;
     address public immutable owner; //owner won't change. Save some gas.
 
     struct Feed {
@@ -30,7 +29,7 @@ contract Feedback {
     }
 
     function _isValidIndex(uint256 index) private view {
-        require(index >= 0 && index <=nextId, "This index is outside of the bound of the array");
+        require(index >= 0 && index < feeds.length, "This index is outside of the bound of the array");
     }
 
     function _isValidData(bytes calldata data) private pure {
@@ -62,24 +61,15 @@ contract Feedback {
         owner = msg.sender;
     }
 
-    function updateNextId() private {
-        //Prevent artihmetic overflow
-        nextId = nextId.add(1);
-    }
-
     function createFeed(uint256 _rate, string calldata _message, string calldata _user) validRate(_rate) validString(_message) validString(_user) external {      
-        {
-            feeds.push(Feed({
-                rate: _rate,
-                id: nextId,
-                createdAt: block.timestamp,
-                message: _message,
-                user: _user
-            }));
-            emit OnNewFeed(block.timestamp, _message, _user, _rate);
-        }
-        
-        updateNextId();   
+        feeds.push(Feed({
+            rate: _rate,
+            id: feeds.length,
+            createdAt: block.timestamp,
+            message: _message,
+            user: _user
+        }));
+        emit OnNewFeed(block.timestamp, _message, _user, _rate); 
     }
 
     function getFeedCount() public view returns (uint){

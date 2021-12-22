@@ -4,7 +4,7 @@
 require("dotenv").config();
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
-const { GANACHE_LOCALHOST, GANACHE_PRIVATE_KEY } = process.env;
+const { GANACHE_LOCALHOST, GANACHE_PRIVATE_KEY_DEPLOYER } = process.env;
 
 module.exports = {
   solidity: "0.8.0",
@@ -12,7 +12,7 @@ module.exports = {
   networks: {
     ganache: {
       url: GANACHE_LOCALHOST,
-      accounts: [GANACHE_PRIVATE_KEY],
+      accounts: [GANACHE_PRIVATE_KEY_DEPLOYER],
     },
   },
 };

@@ -13,3 +13,5 @@ main()
     console.log(error);
     process.exit(1);
   });
+
+//Contract address local 0xD735c8F335669503FD97765980c12f2825900BF2
