@@ -72,10 +72,6 @@ contract Feedback {
         emit OnNewFeed(block.timestamp, _message, _user, _rate); 
     }
 
-    function getFeedCount() public view returns (uint){
-        return feeds.length;
-    }
-
     function getFeed(uint256 _index) validIndex(_index) public view returns(uint256 rate, uint256 id, uint createdAt, string memory message, string memory user)
     {
         Feed storage feed = feeds[_index];
