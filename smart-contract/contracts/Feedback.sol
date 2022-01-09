@@ -87,4 +87,12 @@ contract Feedback {
             feed.user
         );
     }
+
+    function getAllFeeds() external view returns(Feed[] memory) {
+        return feeds;
+    }
+
+    function getFeedsCount() external view returns(uint256) {
+        return feeds.length;
+    }
 }
