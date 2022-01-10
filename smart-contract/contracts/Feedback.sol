@@ -23,7 +23,7 @@ contract Feedback {
 
     Feed[] public feeds;
 
-    event OnNewFeed(uint indexed createdAt, uint indexed _rate, string indexed _user, string _message);
+    event OnNewFeed(uint indexed createdAt, uint indexed _rate, string _user, string _message);
     event OnNewResponse(uint indexed createdAt, uint indexed index);
 
     //Reduce code size by wrapping modifier inside private
