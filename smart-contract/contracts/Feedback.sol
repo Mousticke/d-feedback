@@ -7,17 +7,24 @@ contract Feedback {
     using SafeMath for uint256;
     address public immutable owner; //owner won't change. Save some gas.
 
+    struct Response {
+        uint createdAt;
+        string message;
+    }
+
     struct Feed {
         uint256 rate;
         uint256 id;
         uint createdAt;
         string message;
         string user;
+        Response response;
     }
 
     Feed[] public feeds;
 
-    event OnNewFeed(uint indexed createdAt, string message, string user, uint256 rate);
+    event OnNewFeed(uint indexed createdAt, uint indexed _rate, string indexed _user, string _message);
+    event OnNewResponse(uint indexed createdAt, uint indexed index);
 
     //Reduce code size by wrapping modifier inside private
     function _isValidRateData(uint256 rate) private pure {
@@ -32,10 +39,10 @@ contract Feedback {
         require(index >= 0 && index < feeds.length, "This index is outside of the bound of the array");
     }
 
-    function _isValidData(bytes calldata data) private pure {
-        require(data.length > 0, "The data cannot be empty");
+    modifier onlyOwner(){
+        require(msg.sender == owner, "Only the owner can reply.");
+        _;
     }
-
 
     modifier validRate(uint256 rate){
         _isValidRateData(rate);
@@ -47,32 +54,43 @@ contract Feedback {
         _;
     }
 
-    modifier validData(bytes calldata data){
-        _isValidData(data);
-        _;
-    }
-
     modifier validIndex(uint256 index){
         _isValidIndex(index);
         _;
     }
 
-    constructor() {
-        owner = msg.sender;
+    constructor(address _owner) {
+        require(_owner != address(0), "Invalid owner");
+        owner = _owner;
     }
 
-    function createFeed(uint256 _rate, string calldata _message, string calldata _user) validRate(_rate) validString(_message) validString(_user) external {      
-        feeds.push(Feed({
+    function createFeed(uint _rate, string calldata _message, string calldata _user) validRate(_rate) validString(_message) validString(_user) external {      
+        
+        Response memory res = Response({
+        createdAt: block.timestamp,
+                message: ""});
+        Feed memory feed = Feed({
             rate: _rate,
             id: feeds.length,
             createdAt: block.timestamp,
             message: _message,
-            user: _user
-        }));
-        emit OnNewFeed(block.timestamp, _message, _user, _rate); 
+            user: _user,
+            response:res
+        });
+        feeds.push(feed);
+        emit OnNewFeed(block.timestamp, _rate, _user, _message); 
     }
 
-    function getFeed(uint256 _index) validIndex(_index) public view returns(uint256 rate, uint256 id, uint createdAt, string memory message, string memory user)
+    function createResponse(uint _index, string calldata _message) onlyOwner validIndex(_index) external {
+        Feed storage feed = feeds[_index];
+        feed.response = Response({
+            createdAt: block.timestamp,
+            message: _message
+        });
+        emit OnNewResponse(block.timestamp, _index); 
+    }
+
+    function getFeed(uint256 _index) validIndex(_index) public view returns(uint256 rate, uint256 id, uint createdAt, string memory message, string memory user, Response memory response)
     {
         Feed storage feed = feeds[_index];
         return (
@@ -80,7 +98,8 @@ contract Feedback {
             feed.id,
             feed.createdAt,
             feed.message,
-            feed.user
+            feed.user,
+            feed.response
         );
     }
 
